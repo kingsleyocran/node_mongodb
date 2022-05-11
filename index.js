@@ -16,8 +16,10 @@ MongoClient.connect(url, (err, client) => {
     (err, result) => {
       assert.equal(err, null);
 
-      console.log("After Insert:\n");
+      console.log("After Insert:\n The ID object of the new insert: ");
+      //result.ops deprecated
       console.log(result.insertedId);
+      console.log("\n\n");
 
       collection.find({}).toArray((err, docs) => {
         assert.equal(err, null);
