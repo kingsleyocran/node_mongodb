@@ -1,4 +1,6 @@
 const MongoClient = require("mongodb").MongoClient;
+
+const dboper = require("./mongo_operations");
 const assert = require("assert");
 
 const url = "mongodb://localhost:27017/";
@@ -10,28 +12,44 @@ MongoClient.connect(url, (err, client) => {
   console.log("Connected correctly to server");
 
   const db = client.db(dbname);
-  const collection = db.collection("dishes");
-  collection.insertOne(
-    { name: "Italian pizza", description: "test" },
-    (err, result) => {
-      assert.equal(err, null);
 
-      console.log("After Insert:\n The ID object of the new insert: ");
-      //result.ops deprecated
-      console.log(result.insertedId);
-      console.log("\n\n");
+  dboper.insertDocument(
+    db,
+    { name: "Vadonut", description: "Test" },
+    "dishes",
+    (result) => {
+      console.log("Insert Document: ", {
+        name: "Vadonut",
+        description: "Test",
+      });
+      console.log();
 
-      collection.find({}).toArray((err, docs) => {
-        assert.equal(err, null);
+      dboper.findDocuments(db, "dishes", (docs) => {
+        console.log("Found Documents:\n", docs);
+        console.log();
 
-        console.log("Found:\n");
-        console.log(docs);
+        dboper.updateDocument(
+          db,
+          { name: "Vadonut" },
+          { description: "Updated Test" },
+          "dishes",
+          (result) => {
+            console.log("Updated Document:\n", result.upsertedId);
+            console.log();
 
-        db.dropCollection("dishes", (err, result) => {
-          assert.equal(err, null);
+            dboper.findDocuments(db, "dishes", (docs) => {
+              console.log("Found Updated Documents:\n", docs);
+              console.log();
 
-          client.close();
-        });
+              db.dropCollection("dishes", (result) => {
+                console.log("Dropped Collection: ", result);
+                console.log();
+
+                client.close();
+              });
+            });
+          }
+        );
       });
     }
   );
